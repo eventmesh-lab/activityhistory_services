@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: activityhistory-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: activityhistory_service
+    ports:
+      - "3439:5432"
+    volumes:
+      - activityhistory_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: activityhistory-api
+    ports:
+      - "7182:7182"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__ConnectionPostgre: "Host=db;Port=5432;Database=activityhistory_service;Username=postgres;Password=postgres"
+    restart: unless-stopped
+
+  api-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: activityhistory-api-dev
+    ports:
+      - "7182:7182"
+    depends_on:
+      - db
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__ConnectionPostgre: "Host=db;Port=5432;Database=activityhistory_service;Username=postgres;Password=postgres"
+    volumes:
+      - ./src:/app/src:ro
+    profiles:
+      - dev
+    restart: unless-stopped
+
+volumes:
+  activityhistory_pg_data:
