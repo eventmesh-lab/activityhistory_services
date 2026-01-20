@@ -270,7 +270,7 @@ Content-Type: application/json
   "type": "https://tools.ietf.org/html/rfc7231#section-6.6.1",
   "title": "An error occurred while processing your request.",
   "status": 500,
-  "detail": "No se pudo registar la actividad en la base de datos"
+  "detail": "No se pudo registrar la actividad en la base de datos"
 }
 ```
 
